@@ -70,6 +70,20 @@ func (s *ScriptRouter) Process(event *config_center.ConfigChangeEvent) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	// Config-center deletion has no rule body. Reset before decoding the
+	// payload so a deleted Script Router cannot retain the previous script.
+	if event.ConfigType == remoting.EventTypeDel {
+		in, _ := ins.GetInstances(s.scriptType)
+
+		if in != nil && s.enabled {
+			in.Destroy(s.rawScript)
+		}
+		s.enabled = false
+		s.rawScript = ""
+		s.scriptType = ""
+		return
+	}
+
 	rawConf, ok := event.Value.(string)
 	if !ok {
 		panic(ok)
@@ -127,16 +141,6 @@ func (s *ScriptRouter) Process(event *config_center.ConfigChangeEvent) {
 				logger.Errorf("Compile Script failed: %v", err)
 			}
 		}
-
-	case remoting.EventTypeDel:
-		in, _ := ins.GetInstances(s.scriptType)
-
-		if in != nil && s.enabled {
-			in.Destroy(s.rawScript)
-		}
-		s.enabled = false
-		s.rawScript = ""
-		s.scriptType = ""
 	}
 }
 

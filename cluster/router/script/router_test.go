@@ -227,6 +227,24 @@ script: |
 	}
 }
 
+func TestScriptRouterProcessDeleteResetsWithoutRuleBody(t *testing.T) {
+	s := &ScriptRouter{
+		enabled:    true,
+		scriptType: "javascript",
+		rawScript:  "return invokers",
+	}
+
+	assert.NotPanics(t, func() {
+		s.Process(&config_center.ConfigChangeEvent{
+			Value:      "",
+			ConfigType: remoting.EventTypeDel,
+		})
+	})
+	assert.False(t, s.enabled)
+	assert.Empty(t, s.scriptType)
+	assert.Empty(t, s.rawScript)
+}
+
 func checkInvokersSame(invokers []base.Invoker, otherInvokers []base.Invoker) bool {
 	k := map[string]struct{}{}
 	for _, invoker := range otherInvokers {
