@@ -81,9 +81,13 @@ func (s *keyListenerSet) snapshot() []config_center.ConfigurationListener {
 }
 
 func callback(set *keyListenerSet, _, group, dataId, data string) {
+	eventType := remoting.EventTypeUpdate
+	if data == "" {
+		eventType = remoting.EventTypeDel
+	}
 	for _, l := range set.snapshot() {
-		l.Process(&config_center.ConfigChangeEvent{Key: dataId, Value: data, ConfigType: remoting.EventTypeUpdate})
-		metrics.Publish(metricsConfigCenter.NewIncMetricEvent(dataId, group, remoting.EventTypeUpdate, metricsConfigCenter.Nacos))
+		l.Process(&config_center.ConfigChangeEvent{Key: dataId, Value: data, ConfigType: eventType})
+		metrics.Publish(metricsConfigCenter.NewIncMetricEvent(dataId, group, eventType, metricsConfigCenter.Nacos))
 	}
 }
 
