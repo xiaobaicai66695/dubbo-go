@@ -83,7 +83,7 @@ func (s *keyListenerSet) snapshot() []config_center.ConfigurationListener {
 func callback(set *keyListenerSet, _, group, dataId, data string) {
 	eventType := remoting.EventTypeUpdate
 	// Nacos invokes configuration listeners for both changes and deletions;
-	// see https://nacos.io/en/docs/v3.0/manual/user/python-sdk/usage/.
+	// see https://nacos.io/en/docs/v3.0/manual/user/go-sdk/usage/.
 	// The Nacos Go SDK represents a deleted configuration with empty callback
 	// data, so translate it to Del instead of asking downstream parsers to
 	// process an empty update.
